@@ -2,9 +2,18 @@
   "name": "monorepo",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
+  "noHoist": ["@prisma/client", "prisma"],
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
     "start": "bun run --env-file=apps/backend/.env.production --filter '*' start"
+  },
+  "dependencies": {
+    "@prisma/adapter-libsql": "^7.6.0",
+    "@prisma/client": "^7.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "prisma": "7.6.0"
   }
 }
