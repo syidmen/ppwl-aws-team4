@@ -1,12 +1,12 @@
 import { Elysia } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 import { jwt } from "@elysiajs/jwt";
+import cors from "@elysiajs/cors";
 import { createOAuthClient, getAuthUrl } from "./auth";
 import { getCourses, getCourseWorks, getSubmissions } from "./classroom";
 import type { ApiResponse, HealthCheck, User } from "shared";
 import type { DbClient } from "./types";
 
-// Auth middleware — reusable di semua route yang butuh autentikasi
 const makeAuthMiddleware = (jwtInstance: any) =>
   async ({ headers, set }: any) => {
     const authHeader = headers.authorization;
@@ -26,20 +26,20 @@ const makeAuthMiddleware = (jwtInstance: any) =>
     return payload;
   };
 
-// Factory menerima `getPrisma` sebagai dependency injection
-// sehingga dev pakai LibSQL, prod pakai PostgreSQL — tanpa mengubah routes
 export const createApp = (getPrisma: () => DbClient) => {
   const app = new Elysia()
+    .use(cors({
+      origin: process.env.FRONTEND_URL ?? "*",
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    }))
     .use(cookie())
-    .use(
-      jwt({
-        name: "jwt",
-        secret: process.env.JWT_SECRET!,
-        exp: "1d",
-      })
-    )
+    .use(jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET!,
+      exp: "1d",
+    }))
 
-    // Middleware akses kontrol untuk /users
     .onRequest(({ request, set }) => {
       const url = new URL(request.url);
       if (!url.pathname.startsWith("/users")) return;
@@ -48,23 +48,19 @@ export const createApp = (getPrisma: () => DbClient) => {
       const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
       const key = url.searchParams.get("key");
 
-      // Izinkan dari frontend resmi
       if (origin === frontendUrl) return;
 
-      // Selain itu wajib pakai API_KEY
       if (key !== process.env.API_KEY) {
         set.status = 401;
         return { message: "Unauthorized: Access denied without valid API Key" };
       }
     })
 
-    // Health check
     .get("/", (): ApiResponse<HealthCheck> => ({
       data: { status: "ok" },
       message: "server running",
     }))
 
-    // Users
     .get("/users", async () => {
       const users = await getPrisma().user.findMany();
       const response: ApiResponse<User[]> = {
@@ -74,14 +70,12 @@ export const createApp = (getPrisma: () => DbClient) => {
       return response;
     })
 
-    // Auth — redirect ke Google login
     .get("/auth/login", ({ redirect }) => {
       const oauth2Client = createOAuthClient();
       const url = getAuthUrl(oauth2Client);
       return redirect(url);
     })
 
-    // Auth — Google OAuth callback
     .get("/auth/callback", async ({ query, jwt, redirect }) => {
       const { code } = query as any;
       const oauth2Client = createOAuthClient();
@@ -95,7 +89,6 @@ export const createApp = (getPrisma: () => DbClient) => {
       return redirect(`${process.env.FRONTEND_URL}/classroom?token=${token}`);
     })
 
-    // Auth — cek sesi user dari JWT
     .get("/auth/me", async ({ headers, jwt, set }) => {
       const auth = makeAuthMiddleware(jwt);
       const user = await auth({ headers, set });
@@ -103,7 +96,6 @@ export const createApp = (getPrisma: () => DbClient) => {
       return { loggedIn: true, user };
     })
 
-    // Classroom — daftar courses
     .get("/classroom/courses", async ({ headers, jwt, set }) => {
       const auth = makeAuthMiddleware(jwt);
       const user = await auth({ headers, set });
@@ -113,7 +105,6 @@ export const createApp = (getPrisma: () => DbClient) => {
       return { data: courses };
     })
 
-    // Classroom — submissions per course
     .get("/classroom/courses/:courseId/submissions", async ({ params, headers, jwt, set }) => {
       const auth = makeAuthMiddleware(jwt);
       const user = await auth({ headers, set });
