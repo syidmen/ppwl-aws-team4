@@ -7,11 +7,12 @@
 | Nama | NIM | Job |
 |------|-----|-----|
 | Muhammad Rasyid | H1101241049 | Admin |
-| Syarifah Munibah Arifah Rajiyah | H1101241027 | Budget & Cost |
-| Radika Trieza Aritonang | H1101241024 | RDS Database |
-| Syafira Aulianisa | H1101241025 | Lambda Backend |
+| Saskia Mecca Widyarni | H1101241038 | Budget & Cost |
+| Syarifah Munibah Arifah Rajiyah | H1101241027 | RDS Database |
+| Radika Trieza Aritonang | H1101241024 | Lambda Backend |
 | Atikoh | H1101241056 | S3+CloudFront Frontend |
-| Saskia Mecca Widyarni | H1101241038 | Test & Docs |
+| Syafira Aulianisa | H1101241025 | Test & Docs |
+
 
 ## Arsitektur Diagram AWS
 > [Arsitektur Diagram AWS](https://canva.link/5shlv4ugb5yx9c1)
