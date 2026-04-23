@@ -6,6 +6,6 @@ export default defineConfig({
     seed: "bun ./prisma/seed.ts",
   },
   datasource: {
-    url: "postgresql://postgres:ppwlteam4@monorepo-db.csxc40imi5ff.us-east-1.rds.amazonaws.com:5432/monorepo_prod",
+    url: "file:./dev.db",
   },
 });
