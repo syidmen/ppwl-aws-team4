@@ -14,9 +14,9 @@ export default defineConfig(({ mode }) => {
   // .env (Prioritas terendah)
   const env = loadEnv(mode, process.cwd(), '');
 
-  const check = env.VITE_CHECK;
-  if (!check) throw new Error("env is not detected");
-  console.log("Berhasil env:", check)
+  const check = env.VITE_BACKEND_URL;
+  if (!check) throw new Error("VITE_BACKEND_URL belum diset");
+  console.log("Backend URL:", check)
 
   return {
     // Sekarang Anda bisa menggunakan variabel env di sini jika butuh, 
